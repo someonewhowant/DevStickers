@@ -1,8 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'app-about',
-    standalone: true,
     template: `
     <div class="container about-page animate-in">
         <section class="about-hero">
@@ -58,6 +57,7 @@ import { Component } from '@angular/core';
     }
     .card:hover { border-color: var(--accent-purple); }
     .card h3 { margin-bottom: var(--spacing-sm); color: var(--accent-purple); font-family: 'JetBrains Mono', monospace; }
-  `]
+  `],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AboutComponent { }

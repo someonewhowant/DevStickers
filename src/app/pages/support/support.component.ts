@@ -1,8 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'app-support',
-    standalone: true,
     template: `
     <div class="container support-page animate-in">
         <header class="support-header">
@@ -63,6 +62,7 @@ import { Component } from '@angular/core';
     @media (max-width: 768px) {
         .support-content { grid-template-columns: 1fr; }
     }
-  `]
+  `],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SupportComponent { }

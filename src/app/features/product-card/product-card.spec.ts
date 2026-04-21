@@ -1,18 +1,29 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ProductCardComponent } from './product-card.component';
+import { Product } from '../../models/product.model';
 
-import { ProductCard } from './product-card';
-
-describe('ProductCard', () => {
-  let component: ProductCard;
-  let fixture: ComponentFixture<ProductCard>;
+describe('ProductCardComponent', () => {
+  let component: ProductCardComponent;
+  let fixture: ComponentFixture<ProductCardComponent>;
+  const mockProduct: Product = {
+    id: 'test-id',
+    name: 'Test Product',
+    price: 10,
+    image: '/test.png',
+    tag: 'Test Tag'
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProductCard],
+      imports: [ProductCardComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ProductCard);
+    fixture = TestBed.createComponent(ProductCardComponent);
     component = fixture.componentInstance;
+    
+    // Set required input
+    fixture.componentRef.setInput('product', mockProduct);
+    
     await fixture.whenStable();
   });
 

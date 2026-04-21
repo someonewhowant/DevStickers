@@ -1,10 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProductListComponent } from '../../features/product-list/product-list.component';
 
 @Component({
   selector: 'app-collections',
-  standalone: true,
   imports: [CommonModule, ProductListComponent],
   template: `
     <div class="container collections-page animate-in">
@@ -53,7 +52,8 @@ import { ProductListComponent } from '../../features/product-list/product-list.c
         .collections-page { grid-template-columns: 1fr; }
         .sidebar { display: none; }
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CollectionsComponent {
   selected = signal('All');

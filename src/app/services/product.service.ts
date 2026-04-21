@@ -18,12 +18,17 @@ export class ProductService {
   products = signal<Product[]>(this.loadProducts());
 
   private loadProducts(): Product[] {
-    const stored = localStorage.getItem(this.STORAGE_KEY);
-    return stored ? JSON.parse(stored) : this.initialProducts;
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      return stored ? JSON.parse(stored) : this.initialProducts;
+    }
+    return this.initialProducts;
   }
 
   private saveToStorage(products: Product[]) {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(products));
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(products));
+    }
   }
 
   addProduct(product: Product) {
