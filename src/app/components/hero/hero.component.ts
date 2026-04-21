@@ -1,9 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
     selector: 'app-hero',
-    standalone: true,
     imports: [RouterModule],
     template: `
     <section class="hero animate-in">
@@ -50,6 +49,8 @@ import { RouterModule } from '@angular/router';
             font-size: 2.5rem;
         }
     }
-  `]
+  `],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HeroComponent { }
+

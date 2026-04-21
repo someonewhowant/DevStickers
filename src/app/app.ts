@@ -1,11 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [RouterModule, HeaderComponent, FooterComponent],
   template: `
     <app-header></app-header>
@@ -18,6 +17,7 @@ import { FooterComponent } from './components/footer/footer.component';
     main {
         min-height: calc(100vh - 70px - 200px); /* Adjust based on header/footer height */
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent { }

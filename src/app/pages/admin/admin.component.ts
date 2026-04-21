@@ -1,13 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, inject, signal, computed } from '@angular/core';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { ProductService } from '../../services/product.service';
-import { Product } from '../../services/cart.service';
+import { Product } from '../../models/product.model';
 
 @Component({
     selector: 'app-admin',
-    standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, ReactiveFormsModule, NgOptimizedImage],
     template: `
     <div class="container admin-page animate-in">
         <header class="admin-header">
@@ -15,97 +14,110 @@ import { Product } from '../../services/cart.service';
                 <h1>Dashboard</h1>
                 <p class="subtitle">Manage sticker inventory and catalog</p>
             </div>
-            <button class="btn btn-primary" (click)="showForm.set(true)">+ Create Sticker</button>
+            <button class="btn btn-primary" (click)="openCreateForm()">+ Create Sticker</button>
         </header>
 
         <!-- Product Form -->
-        <div class="modal" *ngIf="showForm()">
-            <div class="modal-content">
-                <h3>{{ isEditing() ? 'Edit Product' : 'Add New Product' }}</h3>
-                <form class="modal-form" (submit)="saveProduct($event)">
-                    <div class="form-main">
-                        <div class="form-row">
-                            <div class="form-group flex-1">
-                                <label>Product ID</label>
-                                <input type="text" [(ngModel)]="currentProduct().id" name="id" [disabled]="isEditing()" placeholder="e.g. gopher-01" required>
-                            </div>
-                            <div class="form-group flex-1">
-                                <label>Category Tag</label>
-                                <input type="text" [(ngModel)]="currentProduct().tag" name="tag" placeholder="e.g. Go Lang" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Product Name</label>
-                            <input type="text" [(ngModel)]="currentProduct().name" name="name" placeholder="Name of your sticker" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Price ($)</label>
-                            <input type="number" [(ngModel)]="currentProduct().price" name="price" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Image Source</label>
-                            <div class="source-tabs">
-                                <button type="button" class="tab-btn" 
-                                        [class.active]="imageSource() === 'asset'"
-                                        (click)="imageSource.set('asset')">Local Assets</button>
-                                <button type="button" class="tab-btn" 
-                                        [class.active]="imageSource() === 'url'"
-                                        (click)="imageSource.set('url')">External URL</button>
-                            </div>
-                        </div>
-
-                        <div class="form-group" *ngIf="imageSource() === 'asset'">
-                            <label>Quick Image Selection</label>
-                            <div class="asset-gallery">
-                                <div class="asset-item" *ngFor="let asset of availableAssets" 
-                                     [class.selected]="currentProduct().image === asset"
-                                     (click)="selectAsset(asset)">
-                                    <img [src]="asset" [alt]="asset">
+        @if (showForm()) {
+            <div class="modal">
+                <div class="modal-content">
+                    <h3>{{ isEditing() ? 'Edit Product' : 'Add New Product' }}</h3>
+                    <form class="modal-form" [formGroup]="productForm" (ngSubmit)="saveProduct()">
+                        <div class="form-main">
+                            <div class="form-row">
+                                <div class="form-group flex-1">
+                                    <label>Product ID</label>
+                                    <input type="text" formControlName="id" placeholder="e.g. gopher-01">
+                                </div>
+                                <div class="form-group flex-1">
+                                    <label>Category Tag</label>
+                                    <input type="text" formControlName="tag" placeholder="e.g. Go Lang">
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>{{ imageSource() === 'asset' ? 'Internal Path' : 'Image URL' }}</label>
-                            <input type="text" [(ngModel)]="currentProduct().image" name="image" 
-                                   [placeholder]="imageSource() === 'asset' ? '/assets/images/...' : 'https://...'" required>
-                            <p class="input-hint" *ngIf="imageSource() === 'url' && !currentProduct().image.startsWith('http') && currentProduct().image">
-                                ⚠️ URL should start with http:// or https://
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="form-preview">
-                        <label>Live Preview</label>
-                        <div class="preview-card" *ngIf="currentProduct().image">
-                            <div class="preview-img-container">
-                                <img [src]="currentProduct().image" alt="Preview">
+                            <div class="form-group">
+                                <label>Product Name</label>
+                                <input type="text" formControlName="name" placeholder="Name of your sticker">
                             </div>
-                            <div class="preview-meta">
-                                <strong>{{ currentProduct().name || 'Product Name' }}</strong>
-                                <span>{{ currentProduct().tag || 'Category' }}</span>
-                                <em class="price">{{ currentProduct().price | currency }}</em>
+                            <div class="form-group">
+                                <label>Price ($)</label>
+                                <input type="number" formControlName="price">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Image Source</label>
+                                <div class="source-tabs">
+                                    <button type="button" class="tab-btn" 
+                                            [class.active]="imageSource() === 'asset'"
+                                            (click)="setImageSource('asset')">Local Assets</button>
+                                    <button type="button" class="tab-btn" 
+                                            [class.active]="imageSource() === 'url'"
+                                            (click)="setImageSource('url')">External URL</button>
+                                </div>
+                            </div>
+
+                            @if (imageSource() === 'asset') {
+                                <div class="form-group">
+                                    <label>Quick Image Selection</label>
+                                    <div class="asset-gallery">
+                                        @for (asset of availableAssets; track asset) {
+                                            <div class="asset-item" 
+                                                 [class.selected]="productForm.get('image')?.value === asset"
+                                                 (click)="selectAsset(asset)">
+                                                <img [src]="asset" [alt]="asset">
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="form-group">
+                                <label>{{ imageSource() === 'asset' ? 'Internal Path' : 'Image URL' }}</label>
+                                <input type="text" formControlName="image" 
+                                       [placeholder]="imageSource() === 'asset' ? '/assets/images/...' : 'https://...'">
+                                @if (imageSource() === 'url' && productForm.get('image')?.value && !productForm.get('image')?.value?.startsWith('http')) {
+                                    <p class="input-hint">
+                                        ⚠️ URL should start with http:// or https://
+                                    </p>
+                                }
                             </div>
                         </div>
-                        <div class="preview-placeholder" *ngIf="!currentProduct().image">
-                            <span>Select an image to see preview</span>
-                        </div>
-                    </div>
 
-                    <div class="form-footer">
-                        <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">
-                            {{ isEditing() ? 'Update Sticker' : 'Create Sticker' }}
-                        </button>
-                    </div>
-                </form>
+                        <div class="form-preview">
+                            <label>Live Preview</label>
+                            @if (productForm.get('image')?.value) {
+                                <div class="preview-card">
+                                    <div class="preview-img-container">
+                                        <img [src]="productForm.get('image')?.value" alt="Preview">
+                                    </div>
+                                    <div class="preview-meta">
+                                        <strong>{{ productForm.get('name')?.value || 'Product Name' }}</strong>
+                                        <span>{{ productForm.get('tag')?.value || 'Category' }}</span>
+                                        <em class="price">{{ productForm.get('price')?.value | currency }}</em>
+                                    </div>
+                                </div>
+                            } @else {
+                                <div class="preview-placeholder">
+                                    <span>Select an image to see preview</span>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="form-footer">
+                            <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
+                            <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid">
+                                {{ isEditing() ? 'Update Sticker' : 'Create Sticker' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
+        }
 
-        <div class="admin-actions-bar" *ngIf="productService.products().length > 0">
-             <button class="btn btn-outline" (click)="resetToDefaults()">Reset to Defaults</button>
-        </div>
+        @if (productService.products().length > 0) {
+            <div class="admin-actions-bar">
+                 <button class="btn btn-outline" (click)="resetToDefaults()">Reset to Defaults</button>
+            </div>
+        }
 
         <!-- Product Table -->
         <div class="table-container">
@@ -119,29 +131,31 @@ import { Product } from '../../services/cart.service';
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let p of productService.products()">
-                        <td class="col-image">
-                            <div class="table-img">
-                                <img [src]="p.image" [alt]="p.name">
-                            </div>
-                        </td>
-                        <td class="col-info">
-                            <div class="info-content">
-                                <span class="tag">{{ p.tag }}</span>
-                                <div class="p-name">{{ p.name }}</div>
-                                <div class="p-id">ID: #{{ p.id }}</div>
-                            </div>
-                        </td>
-                        <td class="col-price">
-                            <span class="price-val">{{ p.price | currency }}</span>
-                        </td>
-                        <td class="col-actions">
-                            <div class="action-buttons">
-                                <button class="btn-icon" (click)="editProduct(p)" title="Edit">✏️</button>
-                                <button class="btn-icon" (click)="deleteProduct(p.id)" title="Delete">🗑️</button>
-                            </div>
-                        </td>
-                    </tr>
+                    @for (p of productService.products(); track p.id) {
+                        <tr>
+                            <td class="col-image">
+                                <div class="table-img">
+                                    <img [ngSrc]="p.image" [alt]="p.name" width="40" height="40">
+                                </div>
+                            </td>
+                            <td class="col-info">
+                                <div class="info-content">
+                                    <span class="tag">{{ p.tag }}</span>
+                                    <div class="p-name">{{ p.name }}</div>
+                                    <div class="p-id">ID: #{{ p.id }}</div>
+                                </div>
+                            </td>
+                            <td class="col-price">
+                                <span class="price-val">{{ p.price | currency }}</span>
+                            </td>
+                            <td class="col-actions">
+                                <div class="action-buttons">
+                                    <button class="btn-icon" (click)="editProduct(p)" title="Edit">✏️</button>
+                                    <button class="btn-icon" (click)="deleteProduct(p.id)" title="Delete">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
@@ -173,7 +187,7 @@ import { Product } from '../../services/cart.service';
     .admin-table td { padding: 1.25rem var(--spacing-md); border-bottom: 1px solid var(--border-color); }
     
     .table-img { width: 48px; height: 48px; background: var(--card-bg); border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-    .table-img img { max-width: 80%; }
+    .table-img img { max-width: 80%; height: auto; }
     
     .info-content { display: flex; flex-direction: column; gap: 0.25rem; }
     .p-name { font-weight: 600; font-size: 1.1rem; }
@@ -261,15 +275,24 @@ import { Product } from '../../services/cart.service';
         .modal-form { grid-template-columns: 1fr; }
         .form-preview { order: -1; }
     }
-  `]
+  `],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminComponent {
+    private fb = inject(FormBuilder);
     productService = inject(ProductService);
 
     showForm = signal(false);
     isEditing = signal(false);
     imageSource = signal<'asset' | 'url'>('asset');
-    currentProduct = signal<Product>({ id: '', name: '', price: 0, image: '', tag: '' });
+    
+    productForm: FormGroup = this.fb.group({
+        id: ['', Validators.required],
+        name: ['', Validators.required],
+        price: [0, [Validators.required, Validators.min(0)]],
+        image: ['', Validators.required],
+        tag: ['', Validators.required]
+    });
 
     availableAssets = [
         '/assets/images/gopher.png',
@@ -279,14 +302,31 @@ export class AdminComponent {
         '/assets/images/js.png'
     ];
 
+    openCreateForm() {
+        this.isEditing.set(false);
+        this.productForm.reset({ price: 0 });
+        this.productForm.get('id')?.enable();
+        this.showForm.set(true);
+    }
+
+    setImageSource(source: 'asset' | 'url') {
+        this.imageSource.set(source);
+    }
+
     selectAsset(path: string) {
-        this.currentProduct.update(p => ({ ...p, image: path }));
+        this.productForm.patchValue({ image: path });
     }
 
     editProduct(product: Product) {
-        this.currentProduct.set({ ...product });
         this.isEditing.set(true);
-        // Determine source based on path
+        this.productForm.setValue({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.image,
+            tag: product.tag
+        });
+        this.productForm.get('id')?.disable();
         this.imageSource.set(product.image.startsWith('http') ? 'url' : 'asset');
         this.showForm.set(true);
     }
@@ -297,12 +337,15 @@ export class AdminComponent {
         }
     }
 
-    saveProduct(event: Event) {
-        event.preventDefault();
+    saveProduct() {
+        if (this.productForm.invalid) return;
+
+        const productData = this.productForm.getRawValue() as Product;
+
         if (this.isEditing()) {
-            this.productService.updateProduct(this.currentProduct());
+            this.productService.updateProduct(productData);
         } else {
-            this.productService.addProduct(this.currentProduct());
+            this.productService.addProduct(productData);
         }
         this.cancel();
     }
@@ -316,6 +359,6 @@ export class AdminComponent {
     cancel() {
         this.showForm.set(false);
         this.isEditing.set(false);
-        this.currentProduct.set({ id: '', name: '', price: 0, image: '', tag: '' });
+        this.productForm.reset();
     }
 }

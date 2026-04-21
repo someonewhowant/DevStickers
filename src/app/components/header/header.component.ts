@@ -1,11 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 
 @Component({
     selector: 'app-header',
-    standalone: true,
     imports: [CommonModule, RouterModule],
     template: `
     <header class="main-header">
@@ -24,7 +23,9 @@ import { CartService } from '../../services/cart.service';
                     <button class="cart-btn" [routerLink]="['/cart']" [attr.data-count]="cartService.cartCount()">
                         <span class="cart-icon">🛒</span>
                         <span class="cart-text">Cart</span>
-                        <span class="cart-badge" *ngIf="cartService.cartCount() > 0">{{ cartService.cartCount() }}</span>
+                        @if (cartService.cartCount() > 0) {
+                            <span class="cart-badge">{{ cartService.cartCount() }}</span>
+                        }
                     </button>
                 </div>
             </nav>
@@ -145,7 +146,8 @@ import { CartService } from '../../services/cart.service';
             display: none;
         }
     }
-  `]
+  `],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HeaderComponent {
     cartService = inject(CartService);

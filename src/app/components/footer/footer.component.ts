@@ -1,9 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-footer',
-  standalone: true,
   imports: [RouterModule],
   template: `
     <footer>
@@ -40,6 +39,7 @@ import { RouterModule } from '@angular/router';
     .copyright { text-align: center; color: var(--text-secondary); font-size: 0.8rem; margin-top: var(--spacing-md); }
     .admin-link { opacity: 0.3; transition: opacity 0.3s; }
     .admin-link:hover { opacity: 1; color: var(--accent-blue); }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FooterComponent { }

@@ -1,11 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProductCardComponent } from '../product-card/product-card.component';
 import { ProductService } from '../../services/product.service';
 
 @Component({
   selector: 'app-product-list',
-  standalone: true,
   imports: [CommonModule, ProductCardComponent],
   template: `
     <section class="products">
@@ -25,7 +24,8 @@ import { ProductService } from '../../services/product.service';
         gap: var(--spacing-md);
         padding: var(--spacing-lg) 0;
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductListComponent {
   productService = inject(ProductService);

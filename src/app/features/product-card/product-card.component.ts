@@ -1,15 +1,15 @@
-import { Component, Input, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { CartService, Product } from '../../services/cart.service';
+import { Component, inject, ChangeDetectionStrategy, input } from '@angular/core';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { CartService } from '../../services/cart.service';
+import { Product } from '../../models/product.model';
 
 @Component({
   selector: 'app-product-card',
-  standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgOptimizedImage],
   template: `
-    <div class="product-card animate-in" [id]="'sticker-' + product.id">
+    <div class="product-card animate-in" [id]="'sticker-' + product().id">
         <div class="image-wrapper">
-            <img [src]="product.image" [alt]="product.name" loading="lazy">
+            <img [ngSrc]="product().image" [alt]="product().name" width="160" height="160" priority="false">
             <div class="overlay">
                 <button class="btn btn-primary" (click)="addToCart()">
                     Add to Bag
@@ -17,9 +17,9 @@ import { CartService, Product } from '../../services/cart.service';
             </div>
         </div>
         <div class="card-content">
-            <span class="tag">{{ product.tag }}</span>
-            <h3>{{ product.name }}</h3>
-            <p class="price">{{ product.price | currency }}</p>
+            <span class="tag">{{ product().tag }}</span>
+            <h3>{{ product().name }}</h3>
+            <p class="price">{{ product().price | currency }}</p>
         </div>
     </div>
   `,
@@ -56,6 +56,7 @@ import { CartService, Product } from '../../services/cart.service';
     .image-wrapper img {
         width: 100%;
         max-width: 160px;
+        height: auto;
         transition: transform 0.5s ease;
     }
 
@@ -102,14 +103,15 @@ import { CartService, Product } from '../../services/cart.service';
         margin: 0;
         font-size: 1.2rem;
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductCardComponent {
-  @Input({ required: true }) product!: Product;
+  product = input.required<Product>();
 
-  cartService = inject(CartService);
+  private cartService = inject(CartService);
 
   addToCart() {
-    this.cartService.addToCart(this.product);
+    this.cartService.addToCart(this.product());
   }
 }

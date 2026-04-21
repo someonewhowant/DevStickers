@@ -1,27 +1,28 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, ChangeDetectionStrategy, computed } from '@angular/core';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 
 @Component({
     selector: 'app-cart',
-    standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule, NgOptimizedImage],
     template: `
     <div class="container cart-page animate-in">
         <h1>Your Shopping Cart</h1>
         
-        <ng-container *ngIf="cartService.cartCount() > 0; else emptyCart">
+        @if (cartService.cartCount() > 0) {
             <div class="cart-layout">
                 <div class="cart-items">
-                    <div class="cart-item" *ngFor="let item of cartService.getCartItems()">
-                        <img [src]="item.image" [alt]="item.name">
-                        <div class="item-info">
-                            <h3>{{ item.name }}</h3>
-                            <span class="tag">{{ item.tag }}</span>
+                    @for (item of cartService.getCartItems(); track item.id) {
+                        <div class="cart-item">
+                            <img [ngSrc]="item.image" [alt]="item.name" width="80" height="80">
+                            <div class="item-info">
+                                <h3>{{ item.name }}</h3>
+                                <span class="tag">{{ item.tag }}</span>
+                            </div>
+                            <p class="price">{{ item.price | currency }}</p>
                         </div>
-                        <p class="price">{{ item.price | currency }}</p>
-                    </div>
+                    }
                 </div>
 
                 <aside class="summary">
@@ -43,14 +44,12 @@ import { CartService } from '../../services/cart.service';
                     <p class="crypto-note">We accept Bitcoin & Ethereum</p>
                 </aside>
             </div>
-        </ng-container>
-
-        <ng-template #emptyCart>
+        } @else {
             <div class="empty-state">
                 <p>Your basket is empty. Time to add some flair to your laptop!</p>
                 <button class="btn btn-primary" [routerLink]="['/collections']">Browse Stickers</button>
             </div>
-        </ng-template>
+        }
     </div>
   `,
     styles: [`
@@ -113,12 +112,13 @@ import { CartService } from '../../services/cart.service';
     @media (max-width: 768px) {
         .cart-layout { grid-template-columns: 1fr; }
     }
-  `]
+  `],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CartComponent {
     cartService = inject(CartService);
 
-    subtotal() {
-        return this.cartService.getCartItems().reduce((acc, item) => acc + item.price, 0);
-    }
+    subtotal = computed(() => 
+        this.cartService.getCartItems().reduce((acc, item) => acc + item.price, 0)
+    );
 }

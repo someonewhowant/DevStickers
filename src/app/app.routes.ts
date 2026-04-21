@@ -1,17 +1,11 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './pages/home/home.component';
-import { AboutComponent } from './pages/about/about.component';
-import { SupportComponent } from './pages/support/support.component';
-import { CollectionsComponent } from './pages/collections/collections.component';
-import { CartComponent } from './pages/cart/cart.component';
-import { AdminComponent } from './pages/admin/admin.component';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: 'collections', component: CollectionsComponent },
-  { path: 'about', component: AboutComponent },
-  { path: 'support', component: SupportComponent },
-  { path: 'cart', component: CartComponent },
-  { path: 'admin', component: AdminComponent },
+  { path: '', loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent) },
+  { path: 'collections', loadComponent: () => import('./pages/collections/collections.component').then(m => m.CollectionsComponent) },
+  { path: 'about', loadComponent: () => import('./pages/about/about.component').then(m => m.AboutComponent) },
+  { path: 'support', loadComponent: () => import('./pages/support/support.component').then(m => m.SupportComponent) },
+  { path: 'cart', loadComponent: () => import('./pages/cart/cart.component').then(m => m.CartComponent) },
+  { path: 'admin', loadComponent: () => import('./pages/admin/admin.component').then(m => m.AdminComponent) },
   { path: '**', redirectTo: '' }
 ];
