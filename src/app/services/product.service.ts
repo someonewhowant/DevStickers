@@ -12,7 +12,14 @@ export class ProductService {
     { id: 'rust', name: 'Safe & Fast Ferris', price: 5, image: '/assets/images/ferris.png', tag: 'Rust', description: 'Ferris the crab is here to ensure your code is memory-safe and blazingly fast.' },
     { id: 'cat', name: 'Root Kitty', price: 6, image: '/assets/images/cat.png', tag: 'Hacking', description: 'Every hacker needs a companion. Root Kitty is always there to watch your terminal.' },
     { id: 'python', name: 'Cyber Serpent', price: 5, image: '/assets/images/python.png', tag: 'Python', description: 'The cyber serpent is elegant, readable, and ready to automate everything.' },
-    { id: 'js', name: 'Async Master', price: 5, image: '/assets/images/js.png', tag: 'JavaScript', description: 'Dominate the web with the Async Master sticker. It won\'t block your main thread.' }
+    { id: 'js', name: 'Async Master', price: 5, image: '/assets/images/js.png', tag: 'JavaScript', description: 'Dominate the web with the Async Master sticker. It won\'t block your main thread.' },
+    { id: 'ts', name: 'Typed Hero', price: 6, image: '/assets/images/js.png', tag: 'TypeScript', description: 'Static typing for a dynamic world. The Typed Hero is here to save your production.' },
+    { id: 'react', name: 'Reactive Atomic', price: 5, image: '/assets/images/js.png', tag: 'React', description: 'Components everywhere! Build complex UIs from simple atoms with this sticker.' },
+    { id: 'angular', name: 'Enterprise Power', price: 7, image: '/assets/images/js.png', tag: 'Angular', description: 'The platform for the modern web developer. Scale your apps to infinity.' },
+    { id: 'vue', name: 'Progressive View', price: 5, image: '/assets/images/js.png', tag: 'Vue', description: 'The progressive framework. Simple, approachable, and versatile.' },
+    { id: 'docker', name: 'Container Whale', price: 6, image: '/assets/images/gopher.png', tag: 'DevOps', description: 'Ship it with confidence. Your application, anywhere, in a neat container.' },
+    { id: 'k8s', name: 'Cloud Captain', price: 8, image: '/assets/images/gopher.png', tag: 'DevOps', description: 'Orchestrate your containers like a pro. The helm is in your hands.' },
+    { id: 'git', name: 'Commit Master', price: 4, image: '/assets/images/cat.png', tag: 'Tools', description: 'Never lose a line of code. Branch, commit, and merge with style.' }
   ];
 
   products = signal<Product[]>(this.loadProducts());

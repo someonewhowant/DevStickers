@@ -33,11 +33,10 @@ import { Product } from '../../models/product.model';
             </div>
             
             <div class="action-section">
-              <button class="btn btn-primary btn-large" (click)="addToCart(p)">
-                Add to Bag
+              <button class="btn btn-primary btn-large" (click)="addToCart(p)" [class.added]="added()">
+                {{ added() ? 'Added to Bag!' : 'Add to Bag' }}
               </button>
             </div>
-            
             <div class="features-list">
               <div class="feature-item">
                 <span class="icon">✨</span>
@@ -183,6 +182,11 @@ import { Product } from '../../models/product.model';
       border-radius: 12px;
     }
 
+    .btn-primary.added {
+      background-color: var(--accent-green);
+      box-shadow: var(--glow-green);
+    }
+
     .features-list {
       display: grid;
       gap: 1rem;
@@ -221,6 +225,7 @@ export class ProductDetailComponent implements OnInit {
 
   product = signal<Product | undefined>(undefined);
   loading = signal(true);
+  added = signal(false);
 
   ngOnInit() {
     const productId = this.route.snapshot.paramMap.get('id');
@@ -232,5 +237,7 @@ export class ProductDetailComponent implements OnInit {
 
   addToCart(product: Product) {
     this.cartService.addToCart(product);
+    this.added.set(true);
+    setTimeout(() => this.added.set(false), 2000);
   }
 }

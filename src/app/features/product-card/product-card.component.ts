@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, input, signal } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CartService } from '../../services/cart.service';
@@ -12,8 +12,8 @@ import { Product } from '../../models/product.model';
         <div class="image-wrapper" [routerLink]="['/product', product().id]">
             <img [ngSrc]="product().image" [alt]="product().name" width="160" height="160" priority="false">
             <div class="overlay">
-                <button class="btn btn-primary" (click)="addToCart($event)">
-                    Add to Bag
+                <button class="btn btn-primary" (click)="addToCart($event)" [class.added]="added()">
+                    {{ added() ? 'Added!' : 'Add to Bag' }}
                 </button>
             </div>
         </div>
@@ -27,6 +27,10 @@ import { Product } from '../../models/product.model';
   styles: [`
     .image-wrapper, .card-content {
         cursor: pointer;
+    }
+    .btn-primary.added {
+        background-color: var(--accent-green);
+        box-shadow: var(--glow-green);
     }
     .product-card {
         background: var(--surface-color);
@@ -112,11 +116,15 @@ import { Product } from '../../models/product.model';
 })
 export class ProductCardComponent {
   product = input.required<Product>();
+  added = signal(false);
 
   private cartService = inject(CartService);
 
   addToCart(event: Event) {
     event.stopPropagation();
     this.cartService.addToCart(this.product());
+    
+    this.added.set(true);
+    setTimeout(() => this.added.set(false), 2000);
   }
 }
