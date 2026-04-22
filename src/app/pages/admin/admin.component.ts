@@ -42,6 +42,10 @@ import { Product } from '../../models/product.model';
                                 <label>Price ($)</label>
                                 <input type="number" formControlName="price">
                             </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea formControlName="description" placeholder="Describe your sticker..." rows="3"></textarea>
+                            </div>
                             
                             <div class="form-group">
                                 <label>Image Source</label>
@@ -232,12 +236,12 @@ import { Product } from '../../models/product.model';
     .flex-1 { flex: 1; }
 
     .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .form-group input { 
+    .form-group input, .form-group textarea { 
         width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
         padding: 0.75rem 1rem; border-radius: 10px; color: white; transition: all 0.2s;
-        font-family: inherit;
+        font-family: inherit; resize: vertical;
     }
-    .form-group input:focus { border-color: var(--accent-blue); outline: none; background: rgba(255,255,255,0.05); }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--accent-blue); outline: none; background: rgba(255,255,255,0.05); }
 
     .source-tabs { display: flex; gap: 0.5rem; background: var(--surface-color); padding: 0.25rem; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 0.5rem; }
     .tab-btn { flex: 1; padding: 0.5rem; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; font-size: 0.8rem; font-weight: 600; }
@@ -291,7 +295,8 @@ export class AdminComponent {
         name: ['', Validators.required],
         price: [0, [Validators.required, Validators.min(0)]],
         image: ['', Validators.required],
-        tag: ['', Validators.required]
+        tag: ['', Validators.required],
+        description: ['', Validators.required]
     });
 
     availableAssets = [
@@ -304,7 +309,7 @@ export class AdminComponent {
 
     openCreateForm() {
         this.isEditing.set(false);
-        this.productForm.reset({ price: 0 });
+        this.productForm.reset({ price: 0, description: '' });
         this.productForm.get('id')?.enable();
         this.showForm.set(true);
     }
@@ -324,7 +329,8 @@ export class AdminComponent {
             name: product.name,
             price: product.price,
             image: product.image,
-            tag: product.tag
+            tag: product.tag,
+            description: product.description || ''
         });
         this.productForm.get('id')?.disable();
         this.imageSource.set(product.image.startsWith('http') ? 'url' : 'asset');

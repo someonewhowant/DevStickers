@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ProductCardComponent } from './product-card.component';
 import { Product } from '../../models/product.model';
+import { provideRouter } from '@angular/router';
 
 describe('ProductCardComponent', () => {
   let component: ProductCardComponent;
@@ -10,12 +11,14 @@ describe('ProductCardComponent', () => {
     name: 'Test Product',
     price: 10,
     image: '/test.png',
-    tag: 'Test Tag'
+    tag: 'Test Tag',
+    description: 'Test Description'
   };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ProductCardComponent],
+      providers: [provideRouter([])]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProductCardComponent);

@@ -1,22 +1,23 @@
 import { Component, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 import { Product } from '../../models/product.model';
 
 @Component({
   selector: 'app-product-card',
-  imports: [CommonModule, NgOptimizedImage],
+  imports: [CommonModule, NgOptimizedImage, RouterLink],
   template: `
     <div class="product-card animate-in" [id]="'sticker-' + product().id">
-        <div class="image-wrapper">
+        <div class="image-wrapper" [routerLink]="['/product', product().id]">
             <img [ngSrc]="product().image" [alt]="product().name" width="160" height="160" priority="false">
             <div class="overlay">
-                <button class="btn btn-primary" (click)="addToCart()">
+                <button class="btn btn-primary" (click)="addToCart($event)">
                     Add to Bag
                 </button>
             </div>
         </div>
-        <div class="card-content">
+        <div class="card-content" [routerLink]="['/product', product().id]">
             <span class="tag">{{ product().tag }}</span>
             <h3>{{ product().name }}</h3>
             <p class="price">{{ product().price | currency }}</p>
@@ -24,6 +25,9 @@ import { Product } from '../../models/product.model';
     </div>
   `,
   styles: [`
+    .image-wrapper, .card-content {
+        cursor: pointer;
+    }
     .product-card {
         background: var(--surface-color);
         border: 1px solid var(--border-color);
@@ -111,7 +115,8 @@ export class ProductCardComponent {
 
   private cartService = inject(CartService);
 
-  addToCart() {
+  addToCart(event: Event) {
+    event.stopPropagation();
     this.cartService.addToCart(this.product());
   }
 }

@@ -13,4 +13,15 @@ describe('ProductService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
+
+  it('should get product by id', () => {
+    const product = service.getProductById('gopher');
+    expect(product).toBeTruthy();
+    expect(product?.id).toBe('gopher');
+  });
+
+  it('should return undefined for non-existent product id', () => {
+    const product = service.getProductById('invalid-id');
+    expect(product).toBeUndefined();
+  });
 });

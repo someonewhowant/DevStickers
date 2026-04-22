@@ -6,6 +6,7 @@ export const routes: Routes = [
   { path: 'about', loadComponent: () => import('./pages/about/about.component').then(m => m.AboutComponent) },
   { path: 'support', loadComponent: () => import('./pages/support/support.component').then(m => m.SupportComponent) },
   { path: 'cart', loadComponent: () => import('./pages/cart/cart.component').then(m => m.CartComponent) },
+  { path: 'product/:id', loadComponent: () => import('./pages/product-detail/product-detail.component').then(m => m.ProductDetailComponent) },
   { path: 'admin', loadComponent: () => import('./pages/admin/admin.component').then(m => m.AdminComponent) },
   { path: '**', redirectTo: '' }
 ];
