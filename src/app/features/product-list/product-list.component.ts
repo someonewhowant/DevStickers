@@ -8,297 +8,355 @@ import { ProductService } from '../../services/product.service';
   selector: 'app-product-list',
   imports: [CommonModule, ProductCardComponent, FormsModule],
   template: `
-    <section class="products">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Available Stickers</h2>
-                <p class="section-subtitle">Choose your favorite stickers to customize your gear</p>
-            </div>
-
-            <!-- Search and Filter Bar -->
-            <div class="controls-bar">
-                <div class="search-box">
-                    <span class="search-icon">🔍</span>
-                    <input 
-                        type="text" 
-                        [ngModel]="searchQuery()" 
-                        (ngModelChange)="onSearchChange($event)"
-                        placeholder="Search stickers by name or category...">
-                </div>
-                
-                <div class="filter-pills">
-                    <button 
-                        class="pill" 
-                        [class.active]="selectedCategory() === 'All'"
-                        (click)="selectCategory('All')">All</button>
-                    @for (category of categories(); track category) {
-                        <button 
-                            class="pill" 
-                            [class.active]="selectedCategory() === category"
-                            (click)="selectCategory(category)">{{ category }}</button>
-                    }
-                </div>
-            </div>
-
-            <!-- Results Info -->
-            <div class="results-info">
-                <span>Showing {{ filteredProducts().length }} stickers</span>
-                @if (searchQuery() || selectedCategory() !== 'All') {
-                    <button class="btn-text" (click)="resetFilters()">Clear Filters</button>
-                }
-            </div>
-
-            <!-- Product Grid -->
-            @if (paginatedProducts().length > 0) {
-                <div class="product-grid">
-                    @for (product of paginatedProducts(); track product.id) {
-                        <app-product-card [product]="product"></app-product-card>
-                    }
+    <section class="catalog-section">
+        <div class="container catalog-container">
+            <!-- Sidebar -->
+            <aside class="sidebar" [class.open]="mobileFiltersOpen()">
+                <div class="sidebar-header">
+                    <h3>Filters</h3>
+                    <button class="close-mobile-btn" (click)="toggleMobileFilters()">✕</button>
                 </div>
 
-                <!-- Pagination -->
-                @if (totalPages() > 1) {
-                    <div class="pagination">
-                        <button 
-                            class="btn-nav" 
-                            [disabled]="currentPage() === 1"
-                            (click)="prevPage()">Previous</button>
-                        
-                        <div class="page-numbers">
-                            @for (page of pageNumbers(); track page) {
-                                <button 
-                                    class="page-num" 
-                                    [class.active]="currentPage() === page"
-                                    (click)="goToPage(page)">{{ page }}</button>
-                            }
+                <div class="filter-group">
+                    <h4>Categories</h4>
+                    <div class="category-list">
+                        <label class="filter-item">
+                            <input type="radio" name="category" [checked]="selectedCategory() === 'All'" (change)="selectCategory('All')">
+                            <span>All Stickers</span>
+                        </label>
+                        @for (category of categories(); track category) {
+                            <label class="filter-item">
+                                <input type="radio" name="category" [checked]="selectedCategory() === category" (change)="selectCategory(category)">
+                                <span>{{ category }}</span>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h4>Price Range</h4>
+                    <div class="price-range">
+                        <input type="range" [min]="minPrice()" [max]="maxPrice()" [ngModel]="priceFilter()" (ngModelChange)="onPriceChange($event)">
+                        <div class="price-labels">
+                            <span>$0</span>
+                            <span>Up to {{ priceFilter() | currency }}</span>
                         </div>
+                    </div>
+                </div>
 
-                        <button 
-                            class="btn-nav" 
-                            [disabled]="currentPage() === totalPages()"
-                            (click)="nextPage()">Next</button>
+                <div class="sidebar-footer">
+                    <button class="btn btn-outline full-width" (click)="resetFilters()">Reset All</button>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="catalog-toolbar">
+                    <div class="toolbar-left">
+                        <button class="mobile-filter-trigger" (click)="toggleMobileFilters()">
+                            <span class="icon">🔍</span> Filters
+                        </button>
+                        <div class="search-bar">
+                            <input 
+                                type="text" 
+                                [ngModel]="searchQuery()" 
+                                (ngModelChange)="onSearchChange($event)"
+                                placeholder="Search our collection...">
+                        </div>
+                    </div>
+
+                    <div class="toolbar-right">
+                        <div class="sort-box">
+                            <label>Sort by:</label>
+                            <select [ngModel]="sortBy()" (ngModelChange)="onSortChange($event)">
+                                <option value="featured">Featured</option>
+                                <option value="price-asc">Price: Low to High</option>
+                                <option value="price-desc">Price: High to Low</option>
+                                <option value="name-asc">Alphabetically: A-Z</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-header">
+                    <p>{{ filteredProducts().length }} products found</p>
+                </div>
+
+                @if (paginatedProducts().length > 0) {
+                    <div class="product-grid">
+                        @for (product of paginatedProducts(); track product.id) {
+                            <app-product-card [product]="product"></app-product-card>
+                        }
+                    </div>
+
+                    <!-- Pagination -->
+                    @if (totalPages() > 1) {
+                        <div class="pagination">
+                            <button 
+                                class="btn-nav" 
+                                [disabled]="currentPage() === 1"
+                                (click)="prevPage()">← Prev</button>
+                            
+                            <div class="page-numbers">
+                                @for (page of pageNumbers(); track page) {
+                                    <button 
+                                        class="page-num" 
+                                        [class.active]="currentPage() === page"
+                                        (click)="goToPage(page)">{{ page }}</button>
+                                }
+                            </div>
+
+                            <button 
+                                class="btn-nav" 
+                                [disabled]="currentPage() === totalPages()"
+                                (click)="nextPage()">Next →</button>
+                        </div>
+                    }
+                } @else {
+                    <div class="no-results">
+                        <div class="no-results-icon">🕵️‍♂️</div>
+                        <h3>No matches found</h3>
+                        <p>Try adjusting your filters or search terms.</p>
+                        <button class="btn btn-primary" (click)="resetFilters()">Clear all filters</button>
                     </div>
                 }
-            } @else {
-                <div class="no-results">
-                    <div class="no-results-icon">😵‍💫</div>
-                    <h3>No stickers found</h3>
-                    <p>Try adjusting your search or filters to find what you're looking for.</p>
-                    <button class="btn btn-primary" (click)="resetFilters()">Reset All Filters</button>
-                </div>
-            }
+            </div>
         </div>
     </section>
   `,
   styles: [`
-    .section-header {
-        text-align: center;
-        margin-bottom: var(--spacing-lg);
-    }
-    .section-title {
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
-        background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .section-subtitle {
-        color: var(--text-secondary);
-        font-size: 1.1rem;
+    .catalog-section {
+        padding: var(--spacing-lg) 0;
+        background: var(--bg-color);
     }
 
-    .controls-bar {
+    .catalog-container {
+        display: grid;
+        grid-template-columns: var(--sidebar-width) 1fr;
+        gap: var(--spacing-xl);
+        max-width: var(--container-max-width);
+        margin: 0 auto;
+        padding: 0 var(--spacing-sm);
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+        position: sticky;
+        top: calc(var(--header-height) + 2rem);
+        height: fit-content;
+    }
+
+    .sidebar h3 {
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1rem;
+    }
+
+    .filter-group {
+        margin-bottom: 2.5rem;
+    }
+
+    .filter-group h4 {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-secondary);
+        margin-bottom: 1.25rem;
+    }
+
+    .category-list {
         display: flex;
         flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .filter-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        cursor: pointer;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        transition: color 0.2s;
+    }
+
+    .filter-item:hover {
+        color: var(--accent-blue);
+    }
+
+    .filter-item input {
+        accent-color: var(--accent-blue);
+        width: 18px;
+        height: 18px;
+    }
+
+    .price-range {
+        padding: 0 0.5rem;
+    }
+
+    .price-range input {
+        width: 100%;
+        accent-color: var(--accent-blue);
+        margin-bottom: 1rem;
+    }
+
+    .price-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    .sidebar-footer {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .full-width { width: 100%; }
+
+    /* Main Content Styles */
+    .catalog-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
         gap: 1.5rem;
-        margin-bottom: var(--spacing-md);
-        background: var(--surface-color);
-        padding: 1.5rem;
-        border-radius: 16px;
-        border: 1px solid var(--border-color);
     }
 
-    @media (min-width: 768px) {
-        .controls-bar {
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-        }
+    .toolbar-left {
+        display: flex;
+        gap: 1rem;
+        flex: 1;
     }
 
-    .search-box {
-        position: relative;
+    .search-bar {
         flex: 1;
         max-width: 400px;
     }
 
-    .search-icon {
-        position: absolute;
-        left: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--text-secondary);
-    }
-
-    .search-box input {
+    .search-bar input {
         width: 100%;
-        padding: 0.75rem 1rem 0.75rem 2.5rem;
-        background: var(--bg-color);
+        padding: 0.75rem 1.25rem;
+        background: var(--surface-color);
         border: 1px solid var(--border-color);
-        border-radius: 10px;
+        border-radius: 12px;
         color: white;
-        font-family: inherit;
-        transition: all 0.3s ease;
+        transition: all 0.3s;
     }
 
-    .search-box input:focus {
+    .search-bar input:focus {
+        border-color: var(--accent-blue);
         outline: none;
-        border-color: var(--accent-blue);
-        box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
-    }
-
-    .filter-pills {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-
-    .pill {
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        color: var(--text-secondary);
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-
-    .pill:hover {
-        border-color: var(--text-secondary);
-        color: var(--text-primary);
-    }
-
-    .pill.active {
-        background: var(--accent-blue);
-        border-color: var(--accent-blue);
-        color: white;
         box-shadow: var(--glow-blue);
     }
 
-    .results-info {
+    .sort-box {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-bottom: 1rem;
-        padding: 0 0.5rem;
-        color: var(--text-secondary);
+        gap: 0.75rem;
         font-size: 0.9rem;
     }
 
-    .btn-text {
-        background: none;
-        border: none;
-        color: var(--accent-blue);
+    .sort-box select {
+        padding: 0.75rem 1rem;
+        background: var(--surface-color);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        color: white;
         cursor: pointer;
-        font-weight: 600;
-        padding: 0;
     }
 
-    .btn-text:hover {
-        text-decoration: underline;
+    .results-header {
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
     }
 
     .product-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: var(--spacing-md);
-        padding-bottom: var(--spacing-lg);
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 2rem;
     }
 
     .pagination {
+        margin-top: 4rem;
         display: flex;
         justify-content: center;
+        gap: 2rem;
         align-items: center;
-        gap: 1.5rem;
-        margin-top: var(--spacing-md);
-        padding: var(--spacing-md) 0;
     }
 
-    .page-numbers {
-        display: flex;
-        gap: 0.5rem;
+    .mobile-filter-trigger, .close-mobile-btn {
+        display: none;
     }
 
-    .page-num {
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        color: var(--text-secondary);
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-weight: 600;
+    @media (max-width: 1024px) {
+        .catalog-container {
+            grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 300px;
+            height: 100vh;
+            background: var(--bg-color);
+            z-index: 2000;
+            padding: 2rem;
+            transition: left 0.3s ease;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .mobile-filter-trigger {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-header h3 { border: none; margin: 0; }
+
+        .close-mobile-btn {
+            display: block;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
     }
 
-    .page-num:hover {
-        border-color: var(--accent-blue);
-        color: var(--text-primary);
-    }
-
-    .page-num.active {
-        background: var(--accent-blue);
-        border-color: var(--accent-blue);
-        color: white;
-    }
-
-    .btn-nav {
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        background: var(--surface-color);
-        border: 1px solid var(--border-color);
-        color: var(--text-primary);
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-weight: 600;
-    }
-
-    .btn-nav:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .btn-nav:not(:disabled):hover {
-        border-color: var(--accent-blue);
-        background: var(--card-bg);
-    }
-
-    .no-results {
-        text-align: center;
-        padding: var(--spacing-xl) 0;
-        background: var(--surface-color);
-        border-radius: 20px;
-        border: 1px dashed var(--border-color);
-    }
-
-    .no-results-icon {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-    }
-
-    .no-results h3 {
-        font-size: 1.5rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .no-results p {
-        color: var(--text-secondary);
-        margin-bottom: 2rem;
+    @media (max-width: 640px) {
+        .catalog-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .toolbar-right {
+            display: flex;
+            justify-content: flex-end;
+        }
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -309,26 +367,45 @@ export class ProductListComponent {
   // State
   searchQuery = signal('');
   selectedCategory = signal('All');
+  priceFilter = signal(20);
+  sortBy = signal('featured');
   currentPage = signal(1);
-  pageSize = 8;
+  pageSize = 9;
+  mobileFiltersOpen = signal(false);
 
   // Computed
+  minPrice = signal(0);
+  maxPrice = signal(20);
+
   categories = computed(() => {
     const tags = this.productService.products().map(p => p.tag);
     return Array.from(new Set(tags)).sort();
   });
 
   filteredProducts = computed(() => {
-    const query = this.searchQuery().toLowerCase();
-    const category = this.selectedCategory();
-    
-    return this.productService.products().filter(p => {
+    let products = [...this.productService.products()].filter(p => {
+      const query = this.searchQuery().toLowerCase();
       const matchesSearch = p.name.toLowerCase().includes(query) || 
-                          p.tag.toLowerCase().includes(query) ||
-                          p.description.toLowerCase().includes(query);
-      const matchesCategory = category === 'All' || p.tag === category;
-      return matchesSearch && matchesCategory;
+                          p.tag.toLowerCase().includes(query);
+      const matchesCategory = this.selectedCategory() === 'All' || p.tag === this.selectedCategory();
+      const matchesPrice = p.price <= this.priceFilter();
+      return matchesSearch && matchesCategory && matchesPrice;
     });
+
+    // Sorting
+    switch (this.sortBy()) {
+      case 'price-asc':
+        products.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-desc':
+        products.sort((a, b) => b.price - a.price);
+        break;
+      case 'name-asc':
+        products.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+    }
+
+    return products;
   });
 
   paginatedProducts = computed(() => {
@@ -337,46 +414,46 @@ export class ProductListComponent {
   });
 
   totalPages = computed(() => Math.ceil(this.filteredProducts().length / this.pageSize));
-
-  pageNumbers = computed(() => {
-    const pages = [];
-    for (let i = 1; i <= this.totalPages(); i++) {
-      pages.push(i);
-    }
-    return pages;
-  });
+  pageNumbers = computed(() => Array.from({ length: this.totalPages() }, (_, i) => i + 1));
 
   // Actions
   onSearchChange(query: string) {
     this.searchQuery.set(query);
-    this.currentPage.set(1); // Reset to first page on search
+    this.currentPage.set(1);
   }
 
   selectCategory(category: string) {
     this.selectedCategory.set(category);
-    this.currentPage.set(1); // Reset to first page on filter change
+    this.currentPage.set(1);
+  }
+
+  onPriceChange(price: number) {
+    this.priceFilter.set(price);
+    this.currentPage.set(1);
+  }
+
+  onSortChange(sort: string) {
+    this.sortBy.set(sort);
   }
 
   resetFilters() {
     this.searchQuery.set('');
     this.selectedCategory.set('All');
+    this.priceFilter.set(20);
+    this.sortBy.set('featured');
     this.currentPage.set(1);
+    this.mobileFiltersOpen.set(false);
+  }
+
+  toggleMobileFilters() {
+    this.mobileFiltersOpen.update(v => !v);
   }
 
   goToPage(page: number) {
     this.currentPage.set(page);
-    window.scrollTo({ top: 400, behavior: 'smooth' });
+    window.scrollTo({ top: 300, behavior: 'smooth' });
   }
 
-  prevPage() {
-    if (this.currentPage() > 1) {
-      this.goToPage(this.currentPage() - 1);
-    }
-  }
-
-  nextPage() {
-    if (this.currentPage() < this.totalPages()) {
-      this.goToPage(this.currentPage() + 1);
-    }
-  }
+  prevPage() { if (this.currentPage() > 1) this.goToPage(this.currentPage() - 1); }
+  nextPage() { if (this.currentPage() < this.totalPages()) this.goToPage(this.currentPage() + 1); }
 }
