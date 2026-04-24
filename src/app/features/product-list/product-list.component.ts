@@ -378,16 +378,16 @@ export class ProductListComponent {
   maxPrice = signal(20);
 
   categories = computed(() => {
-    const tags = this.productService.products().map(p => p.tag);
-    return Array.from(new Set(tags)).sort();
+    const categories = this.productService.products().map(p => p.category);
+    return Array.from(new Set(categories)).sort();
   });
 
   filteredProducts = computed(() => {
     let products = [...this.productService.products()].filter(p => {
       const query = this.searchQuery().toLowerCase();
       const matchesSearch = p.name.toLowerCase().includes(query) || 
-                          p.tag.toLowerCase().includes(query);
-      const matchesCategory = this.selectedCategory() === 'All' || p.tag === this.selectedCategory();
+                          p.category.toLowerCase().includes(query);
+      const matchesCategory = this.selectedCategory() === 'All' || p.category === this.selectedCategory();
       const matchesPrice = p.price <= this.priceFilter();
       return matchesSearch && matchesCategory && matchesPrice;
     });

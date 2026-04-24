@@ -10,7 +10,12 @@ import {
   UseGuards,
   ValidationPipe,
   UsePipes,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { StickersService } from './stickers.service';
 import { CreateStickerDto } from './dto/create-sticker.dto';
 import { UpdateStickerDto } from './dto/update-sticker.dto';
@@ -34,14 +39,41 @@ export class StickersController {
 
   @Post()
   @UseGuards(AdminGuard)
-  create(@Body() createStickerDto: CreateStickerDto) {
-    return this.stickersService.create(createStickerDto);
+  @UseInterceptors(FileInterceptor('image', {
+    storage: diskStorage({
+      destination: './public/uploads',
+      filename: (req, file, cb) => {
+        const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
+        cb(null, `${randomName}${extname(file.originalname)}`);
+      },
+    }),
+  }))
+  create(@UploadedFile() file: Express.Multer.File, @Body() createStickerDto: CreateStickerDto) {
+    const imageUrl = file ? `/uploads/${file.filename}` : createStickerDto.imageUrl;
+    return this.stickersService.create({ ...createStickerDto, imageUrl });
   }
 
   @Patch(':id')
   @UseGuards(AdminGuard)
-  update(@Param('id') id: string, @Body() updateStickerDto: UpdateStickerDto) {
-    return this.stickersService.update(id, updateStickerDto);
+  @UseInterceptors(FileInterceptor('image', {
+    storage: diskStorage({
+      destination: './public/uploads',
+      filename: (req, file, cb) => {
+        const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
+        cb(null, `${randomName}${extname(file.originalname)}`);
+      },
+    }),
+  }))
+  update(
+    @Param('id') id: string, 
+    @UploadedFile() file: Express.Multer.File, 
+    @Body() updateStickerDto: UpdateStickerDto
+  ) {
+    const data = { ...updateStickerDto };
+    if (file) {
+      data.imageUrl = `/uploads/${file.filename}`;
+    }
+    return this.stickersService.update(id, data);
   }
 
   @Delete(':id')

@@ -1,0 +1,13 @@
+import { IsString, IsOptional } from 'class-validator';
+
+export class CreateOrderDto {
+  @IsString()
+  shippingAddress: string;
+
+  @IsString()
+  paymentMethod: string;
+
+  @IsOptional()
+  @IsString()
+  promoCode?: string;
+}

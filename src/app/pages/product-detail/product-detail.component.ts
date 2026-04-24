@@ -18,12 +18,12 @@ import { Product } from '../../models/product.model';
         <div class="product-detail-grid">
           <div class="product-image-section">
             <div class="image-card">
-              <img [ngSrc]="p.image" [alt]="p.name" width="400" height="400" priority="true">
+              <img [ngSrc]="p.imageUrl" [alt]="p.name" width="400" height="400" priority="true">
             </div>
           </div>
           
           <div class="product-info-section">
-            <span class="product-tag">{{ p.tag }}</span>
+            <span class="product-tag">{{ p.category }}</span>
             <h1 class="product-title">{{ p.name }}</h1>
             <p class="product-price">{{ p.price | currency }}</p>
             
@@ -230,9 +230,13 @@ export class ProductDetailComponent implements OnInit {
   ngOnInit() {
     const productId = this.route.snapshot.paramMap.get('id');
     if (productId) {
-      this.product.set(this.productService.getProductById(productId));
+      this.productService.getProductById(productId).subscribe(p => {
+        if (p) this.product.set(p);
+        this.loading.set(false);
+      });
+    } else {
+      this.loading.set(false);
     }
-    this.loading.set(false);
   }
 
   addToCart(product: Product) {

@@ -10,15 +10,17 @@ import { Product } from '../../models/product.model';
   template: `
     <div class="product-card animate-in" [id]="'sticker-' + product().id">
         <div class="image-wrapper" [routerLink]="['/product', product().id]">
-            <img [ngSrc]="product().image" [alt]="product().name" width="160" height="160" priority="false">
+            <img [ngSrc]="product().imageUrl" [alt]="product().name" width="160" height="160" priority="false">
             <div class="overlay">
-                <button class="btn btn-primary" (click)="addToCart($event)" [class.added]="added()">
-                    {{ added() ? 'Added!' : 'Add to Bag' }}
-                </button>
+                @if (showAddButton()) {
+                  <button class="btn btn-primary" (click)="addToCart($event)" [class.added]="added()">
+                      {{ added() ? 'Added!' : 'Add to Bag' }}
+                  </button>
+                }
             </div>
         </div>
         <div class="card-content" [routerLink]="['/product', product().id]">
-            <span class="tag">{{ product().tag }}</span>
+            <span class="tag">{{ product().category }}</span>
             <h3>{{ product().name }}</h3>
             <p class="price">{{ product().price | currency }}</p>
         </div>
@@ -116,6 +118,7 @@ import { Product } from '../../models/product.model';
 })
 export class ProductCardComponent {
   product = input.required<Product>();
+  showAddButton = input<boolean>(true);
   added = signal(false);
 
   private cartService = inject(CartService);

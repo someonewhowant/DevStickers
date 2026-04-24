@@ -21,10 +21,10 @@ import { CartService } from '../../services/cart.service';
                     @for (item of cartService.getCartItems(); track item.product.id) {
                         <div class="cart-item">
                             <div class="item-main" [routerLink]="['/product', item.product.id]">
-                                <img [ngSrc]="item.product.image" [alt]="item.product.name" width="100" height="100">
+                                <img [ngSrc]="item.product.imageUrl" [alt]="item.product.name" width="100" height="100">
                                 <div class="item-info">
                                     <h3>{{ item.product.name }}</h3>
-                                    <span class="tag">{{ item.product.tag }}</span>
+                                    <span class="tag">{{ item.product.category }}</span>
                                     <p class="unit-price">{{ item.product.price | currency }} each</p>
                                 </div>
                             </div>
