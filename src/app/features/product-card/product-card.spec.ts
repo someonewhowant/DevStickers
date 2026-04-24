@@ -10,9 +10,10 @@ describe('ProductCardComponent', () => {
     id: 'test-id',
     name: 'Test Product',
     price: 10,
-    image: '/test.png',
-    tag: 'Test Tag',
-    description: 'Test Description'
+    imageUrl: '/test.png',
+    category: 'Test Category',
+    description: 'Test Description',
+    stock: 100
   };
 
   beforeEach(async () => {
@@ -23,10 +24,10 @@ describe('ProductCardComponent', () => {
 
     fixture = TestBed.createComponent(ProductCardComponent);
     component = fixture.componentInstance;
-    
+
     // Set required input
     fixture.componentRef.setInput('product', mockProduct);
-    
+
     await fixture.whenStable();
   });
 

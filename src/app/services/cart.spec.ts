@@ -8,9 +8,10 @@ describe('CartService', () => {
     id: 'test',
     name: 'Test',
     price: 10,
-    image: '',
-    tag: '',
-    description: ''
+    imageUrl: '',
+    category: '',
+    description: '',
+    stock: 100
   };
 
   beforeEach(() => {

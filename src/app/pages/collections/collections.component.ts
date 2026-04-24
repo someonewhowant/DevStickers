@@ -29,28 +29,69 @@ import { ProductListComponent } from '../../features/product-list/product-list.c
   styles: [`
     .collections-page {
         display: grid;
-        grid-template-columns: 250px 1fr;
-        gap: var(--spacing-lg);
-        padding: var(--spacing-lg) var(--spacing-sm);
+        grid-template-columns: 280px 1fr;
+        gap: var(--spacing-xl);
+        padding: var(--spacing-xl) var(--spacing-md);
     }
-    .sidebar h3 { margin-bottom: var(--spacing-md); font-family: 'JetBrains Mono', monospace; }
-    .filter-list { list-style: none; }
+    .sidebar {
+        background: var(--glass-bg);
+        backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: var(--spacing-lg);
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+        box-shadow: var(--glass-shadow);
+    }
+    .sidebar h3 { 
+        margin-bottom: var(--spacing-lg); 
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: var(--text-secondary);
+    }
+    .filter-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
     .filter-list li {
-        padding: 0.75rem 0;
+        padding: 1rem 1.25rem;
         color: var(--text-secondary);
         cursor: pointer;
-        transition: color 0.3s ease;
-        border-bottom: 1px solid var(--border-color);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 12px;
+        border: 1px solid transparent;
+        font-weight: 500;
     }
-    .filter-list li:hover, .filter-list li.active { color: var(--accent-blue); }
-    .filter-list li.active { font-weight: 700; border-bottom-color: var(--accent-blue); }
+    .filter-list li:hover { 
+        background: rgba(255, 255, 255, 0.03);
+        color: white;
+    }
+    .filter-list li.active { 
+        background: rgba(88, 166, 255, 0.1);
+        color: var(--accent-blue); 
+        border-color: rgba(88, 166, 255, 0.2);
+        font-weight: 700;
+    }
     
-    .collection-header { margin-bottom: var(--spacing-md); }
-    .collection-header h2 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .collection-header { margin-bottom: var(--spacing-xl); }
+    .collection-header h2 { 
+        font-size: 3.5rem; 
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.03em;
+        background: linear-gradient(to right, #fff, var(--text-secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .collection-header p { color: var(--text-secondary); font-size: 1.1rem; }
     
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
         .collections-page { grid-template-columns: 1fr; }
-        .sidebar { display: none; }
+        .sidebar { 
+            position: static; 
+            margin-bottom: var(--spacing-lg);
+        }
+        .filter-list { flex-direction: row; flex-wrap: wrap; }
+        .filter-list li { padding: 0.75rem 1rem; }
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
